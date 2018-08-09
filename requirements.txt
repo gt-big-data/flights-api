@@ -1,0 +1,7 @@
+certifi==2018.4.16
+chardet==3.0.4
+idna==2.7
+-e git+git@github.com:openskynetwork/opensky-api.git@7efa5d80b6505af1910ebd47582012f707cf296f#egg=opensky_api&subdirectory=python
+python-dotenv==0.9.1
+requests==2.19.1
+urllib3==1.23

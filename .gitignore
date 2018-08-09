@@ -1,0 +1,4 @@
+venv
+.env
+gcloud-service-key.json
+__pycache__/

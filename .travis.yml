@@ -1,0 +1,43 @@
+language: python
+python:
+- '3.6'
+
+cache:
+  directories:
+    - "$HOME/google-cloud-sdk/"
+
+install:
+- pip install -r requirements.txt
+- pip install pytest
+
+script:
+  - bash scripts/test.sh
+
+before_deploy:
+  # Check if gcloud exists, and install if it doesn't
+  - gcloud version || true
+  - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
+  
+  # Add gcloud to $PATH
+  - source /home/travis/google-cloud-sdk/path.bash.inc
+  - gcloud --quiet version
+  - gcloud --quiet components update
+
+  # Authenticate the gcloud SDK
+  - openssl aes-256-cbc -K $encrypted_ed1fbf7f6923_key -iv $encrypted_ed1fbf7f6923_iv -ingcloud-service-key.json.enc -out gcloud-service-key.json -d
+  - gcloud auth activate-service-account --key-file gcloud-service-key.json
+  - gcloud config set project bdc-backend
+
+  # Put your gcloud credentials into git
+  - gcloud init && git config --global credential.https://source.developers.google.com.helper gcloud.sh
+  
+  # Add the repository as remote
+  - git remote add google \
+  https://source.developers.google.com/p/bdc-backend/r/flights-api
+
+deploy:
+  - provider: script
+    script: bash scripts/deploy.sh
+    skip_cleanup: true
+    on:
+      branch: master
